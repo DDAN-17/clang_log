@@ -14,7 +14,7 @@ To use `clang_log`, first include it, and `log` in `Cargo.toml`:
 ```toml
 [dependencies]
 log = "0.4.22"
-clang_log = "1.0.2"
+clang_log = "2.1.1"
 ```
 
 Then, initialize it at the start of the program:
