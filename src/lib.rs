@@ -42,6 +42,29 @@ pub fn init(min_level: Level, prog_name: &str) {
 
     let logger = Logger {
         min_level,
+        min_error_level: Level::Error,
+        prog_name: String::from(prog_name),
+        newline_sep: format!("\n{} ", "    | ".white().bold()),
+    };
+    if set_boxed_logger(Box::new(logger)).is_err() {
+        debug!("Logger initialized twice");
+    }
+}
+
+/// Initialize logger with fields.
+/// # Example
+/// ```rust
+/// use log::*;
+///
+/// clang_log::init_error(Level::Trace, Level::Warn, "clang");
+/// ```
+
+pub fn init_error(min_level: Level, min_error_level: Level, prog_name: &str) {
+    set_max_level(min_level.to_level_filter());
+
+    let logger = Logger {
+        min_level,
+        min_error_level,
         prog_name: String::from(prog_name),
         newline_sep: format!("\n{} ", "    | ".white().bold()),
     };
@@ -55,6 +78,8 @@ pub fn init(min_level: Level, prog_name: &str) {
 pub struct Logger {
     /// Minimum level this logger will print. For example: `Level::Trace`
     pub min_level: Level,
+    /// Minimum level this logger will print to stderr. For example: `Level::Warn`
+    pub min_error_level: Level,
     /// Name of the program, set to "clang" in clang. (If clang used clang_log)
     pub prog_name: String,
     /// Constant newline separator, inserted between every newline. Avoids many allocations by storing this as a field.
@@ -71,8 +96,7 @@ impl Log for Logger {
             return;
         }
 
-        // not quite sure whether to use println or eprintln
-        println!(
+        let msg = format!(
             "{}: {} {}",
             self.prog_name,
             match record.level() {
@@ -95,6 +119,12 @@ impl Log for Logger {
             },
             record.args().to_string().replace('\n', &self.newline_sep)
         );
+
+        if record.level() >= self.min_error_level {
+            eprintln!("{}", msg);
+        } else {
+            println!("{}", msg);
+        }
     }
 
     fn flush(&self) {}
