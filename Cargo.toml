@@ -13,5 +13,5 @@ keywords = ["clang", "log", "logging", "logger", "llvm"]
 categories = ["development-tools::debugging"]
 
 [dependencies]
-colored = "2.1.0"
-log = { version = "0.4.22", features = ["std"] }
+colored = "3.0.0"
+log = { version = "0.4.27", features = ["std"] }
