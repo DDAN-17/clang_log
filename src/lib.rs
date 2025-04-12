@@ -43,6 +43,7 @@ pub fn init(min_level: Level, prog_name: &str) {
     let logger = Logger {
         min_level,
         prog_name: String::from(prog_name),
+        newline_sep: format!("\n{} ", "    | ".white().bold()),
     };
     if set_boxed_logger(Box::new(logger)).is_err() {
         debug!("Logger initialized twice");
@@ -56,6 +57,8 @@ pub struct Logger {
     pub min_level: Level,
     /// Name of the program, set to "clang" in clang. (If clang used clang_log)
     pub prog_name: String,
+    /// Constant newline separator, inserted between every newline. Avoids many allocations by storing this as a field.
+    pub newline_sep: String,
 }
 
 impl Log for Logger {
@@ -68,28 +71,29 @@ impl Log for Logger {
             return;
         }
 
+        // not quite sure whether to use println or eprintln
         println!(
-            "{}: {}: {}",
+            "{}: {} {}",
             self.prog_name,
             match record.level() {
                 Level::Error => {
-                    "error".red().bold()
+                    "error:".red().bold()
                 }
                 Level::Warn => {
-                    "warning".bright_purple().bold()
+                    "warning:".bright_purple().bold()
                 }
                 Level::Info => {
-                    "info".bright_black().bold()
+                    "info:".bright_black().bold()
                     //"note".black().bold() // Clang Behavior
                 }
                 Level::Debug => {
-                    "debug".yellow().bold() // Clang doesn't have debug logs
+                    "debug:".yellow().bold() // Clang doesn't have debug logs
                 }
                 Level::Trace => {
-                    "trace".white().bold() // Clang doesn't have trace logs
+                    "trace:".white().bold() // Clang doesn't have trace logs
                 }
             },
-            format!("{}", record.args()).bold()
+            record.args().to_string().replace('\n', &self.newline_sep)
         );
     }
 
