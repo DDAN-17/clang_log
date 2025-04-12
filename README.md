@@ -19,10 +19,19 @@ clang_log = "1.0.2"
 
 Then, initialize it at the start of the program:
 ```rust
-use log::LogLevels;
+use log::Level;
 
 fn main() {
-    clang_log::init(LogLevels::Trace, "clang")
+    clang_log::init(Level::Trace, "clang")
+}
+```
+
+You can also specify a minimum level to start outputting to stderr:
+```rust
+use log::Level;
+
+fn main() {
+    clang_log::init_error(Level::Trace, Level::Warn "clang")
 }
 ```
 
